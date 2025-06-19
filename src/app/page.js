@@ -1,95 +1,50 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+import { useState, useEffect } from 'react';
 
-export default function Home() {
+export default function HomePage() {
+  const [accessToken, setAccessToken] = useState('');
+  const [form, setForm] = useState({ name: '', email: '' });
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    if (token) {
+      setAccessToken(token);
+      // optional: clean URL after setting
+      window.history.replaceState({}, document.title, "/");
+    }
+  }, []);
+
+  const handleConnect = () => {
+    const url = `https://marketplace.gohighlevel.com/oauth/chooselocation?response_type=code&client_id=${process.env.NEXT_PUBLIC_GHL_CLIENT_ID}&redirect_uri=${process.env.NEXT_PUBLIC_REDIRECT_URI}`;
+    window.location.href = url;
+  };
+
+  const handleChange = e => {
+    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleSubmit = async e => {
+    e.preventDefault();
+    const res = await fetch('/api/submit', {
+      method: 'POST',
+      body: JSON.stringify({ ...form, token: accessToken }),
+    });
+    const data = await res.json();
+    alert(JSON.stringify(data));
+  };
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>src/app/page.js</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+    <main style={{ padding: 20 }}>
+      <h1>GHL OAuth + Contact Form</h1>
+      {!accessToken ? (
+        <button onClick={handleConnect}>Connect with GHL</button>
+      ) : (
+        <form onSubmit={handleSubmit}>
+          <input name="name" placeholder="Name" onChange={handleChange} required /><br />
+          <input name="email" placeholder="Email" type="email" onChange={handleChange} required /><br />
+          <button type="submit">Create Contact</button>
+        </form>
+      )}
+    </main>
   );
 }
