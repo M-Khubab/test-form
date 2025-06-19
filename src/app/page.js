@@ -1,3 +1,4 @@
+  "use client"
 import { useState, useEffect } from 'react';
 
 export default function HomePage() {
@@ -15,7 +16,7 @@ export default function HomePage() {
   }, []);
 
   const handleConnect = () => {
-    const url = `https://marketplace.gohighlevel.com/oauth/chooselocation?response_type=code&client_id=${process.env.NEXT_PUBLIC_GHL_CLIENT_ID}&redirect_uri=${process.env.NEXT_PUBLIC_REDIRECT_URI}`;
+    const url = `https://marketplace.gohighlevel.com/oauth/chooselocation?response_type=code&client_id=${process.env.CLIENT_ID}&redirect_uri=${process.env.NEXT_PUBLIC_REDIRECT_URI}`;
     window.location.href = url;
   };
 
